@@ -31,6 +31,10 @@ PROD_FILES=(
   "Dockerfile"
   "docker-compose.yml"
   "install.sh"
+  "CONTRIBUTING.md"
+  "CODE_OF_CONDUCT.md"
+  "LICENSE"
+  "ARCHITECTURE.md"
 )
 
 for file in "${PROD_FILES[@]}"; do
@@ -38,6 +42,15 @@ for file in "${PROD_FILES[@]}"; do
     cp "$LAUNCHER_DIR/$file" "$PROD/$file"
   fi
 done
+
+# Launch assets: .github templates, images (if apply-launch was run)
+if [ -d "$LAUNCHER_DIR/.github" ]; then
+  cp -r "$LAUNCHER_DIR/.github" "$PROD/.github"
+fi
+if [ -d "$LAUNCHER_DIR/images" ]; then
+  mkdir -p "$PROD/images"
+  cp -f "$LAUNCHER_DIR/images/"*.png "$PROD/images/" 2>/dev/null || true
+fi
 
 # Clean dev-only artifacts
 find "$PROD" -name '.DS_Store' -delete 2>/dev/null || true
