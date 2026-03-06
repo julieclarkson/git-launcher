@@ -1,0 +1,21 @@
+{
+  "viewports": {
+    "desktop": { "width": 1440, "height": 900 },
+    "tablet": { "width": 768, "height": 1024 },
+    "mobile": { "width": 375, "height": 812 }
+  },
+  "screenshot": {
+    "waitForNetworkIdle": 15000,
+    "settleDelay": 2000,
+    "serverCheckTimeout": 10000
+  },
+  "socialPreview": {
+    "width": 1200,
+    "height": 630,
+    "defaultColor": "#3B82F6"
+  },
+  "readme": {
+    "maxBadges": 8,
+    "heroImageViewport": "desktop"
+  }
+}

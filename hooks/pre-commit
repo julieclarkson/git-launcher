@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+LAUNCHER_DIR="$(cd "$(dirname "$0")/../.." && pwd)/.git-launcher"
+
+echo "pre-commit: running security checks..."
+
+if ! command -v node &>/dev/null; then
+  echo "ERROR: node not found. Skipping security checks."
+  exit 1
+fi
+
+WORKSPACE="$(cd "$(dirname "$0")/../.." && pwd)"
+
+# 1. Block .env files from being committed (at any depth)
+ENV_FILES=$(git diff --cached --name-only | grep -E '(^|/)\.env($|\..*$)' || true)
+if [ -n "$ENV_FILES" ]; then
+  echo "BLOCKED: refusing to commit secret files:"
+  echo "$ENV_FILES"
+  exit 1
+fi
+
+# 2. Block credential files at any depth
+CRED_FILES=$(git diff --cached --name-only | grep -E '(secrets\.json|credentials\.json|\.pem$|\.key$|\.p12$|\.pfx$)' || true)
+if [ -n "$CRED_FILES" ]; then
+  echo "BLOCKED: refusing to commit credential files:"
+  echo "$CRED_FILES"
+  exit 1
+fi
+
+# 3. Block files containing hardcoded secrets (synced with pre-build-check.js patterns)
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | grep -E '\.(js|jsx|ts|tsx|mjs|cjs|json|yaml|yml|sh|py)$' || true)
+if [ -n "$STAGED_FILES" ]; then
+  for FILE in $STAGED_FILES; do
+    if grep -qE '(sk_live_[a-zA-Z0-9]{20,}|sk_test_[a-zA-Z0-9]{20,}|AKIA[A-Z0-9]{16}|ghp_[a-zA-Z0-9]{36}|gho_[a-zA-Z0-9]{36}|github_pat_[a-zA-Z0-9_]{60,}|-----BEGIN (RSA |EC |DSA )?PRIVATE KEY-----|xox[bpsa]-[a-zA-Z0-9-]{10,})' "$FILE" 2>/dev/null; then
+      echo "BLOCKED: potential secret detected in $FILE"
+      exit 1
+    fi
+  done
+fi
+
+# 4. Run npm audit (warn, don't block — network may be unavailable)
+if [ -f "$LAUNCHER_DIR/package.json" ]; then
+  echo "pre-commit: running npm audit..."
+  cd "$LAUNCHER_DIR"
+  if npm audit --omit=dev 2>/dev/null; then
+    echo "pre-commit: npm audit passed"
+  else
+    echo "WARNING: npm audit found vulnerabilities. Review with: cd .git-launcher && npm audit"
+  fi
+  cd "$WORKSPACE"
+fi
+
+# 5. Block .DS_Store and other OS artifacts
+OS_FILES=$(git diff --cached --name-only | grep -E '(\.DS_Store|Thumbs\.db|Desktop\.ini)$' || true)
+if [ -n "$OS_FILES" ]; then
+  echo "BLOCKED: refusing to commit OS artifacts:"
+  echo "$OS_FILES"
+  echo "Run: git rm --cached $OS_FILES"
+  exit 1
+fi
+
+echo "pre-commit: all checks passed"

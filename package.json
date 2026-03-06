@@ -1,0 +1,33 @@
+{
+  "name": "git-launcher",
+  "version": "0.1.0",
+  "description": "AI agent plugin: generate GitHub launch-ready assets from your codebase",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=18.0.0" },
+  "scripts": {
+    "preflight": "node scripts/preflight.js",
+    "preflight:production": "node scripts/preflight.js --target ../production",
+    "build": "bash scripts/build-production.sh",
+    "deploy": "bash scripts/push-production.sh",
+    "setup": "npm install && npx playwright install chromium && node scripts/verify-setup.js",
+    "setup:chromium": "playwright install chromium",
+    "verify": "node scripts/verify-setup.js",
+    "hooks:install": "bash hooks/install.sh",
+    "security:check": "node scripts/pre-build-check.js",
+    "security:audit": "npm audit",
+    "task-analyze": "node scripts/pre-build-check.js && node scripts/analyze-codebase.js",
+    "task-detect": "node scripts/pre-build-check.js && node scripts/detect-project.js",
+    "task-screenshot": "node scripts/pre-build-check.js && node scripts/screenshot-runner.js",
+    "task-preview": "node scripts/pre-build-check.js && node scripts/generate-preview.js",
+    "task-social": "node scripts/pre-build-check.js && node scripts/image-generator.js",
+    "staleness": "node scripts/staleness-check.js",
+    "apply-launch": "bash scripts/apply-launch.sh"
+  },
+  "dependencies": {
+    "marked": "17.0.4",
+    "playwright": "1.58.2",
+    "sharp": "0.33.5",
+    "picocolors": "1.1.1"
+  }
+}

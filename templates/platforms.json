@@ -1,0 +1,38 @@
+{
+  "_comment": "Platform post format guidelines. Referenced by 07-POSTS.md.",
+  "reddit": {
+    "titleMaxLength": 300,
+    "bodyFormat": "markdown",
+    "culture": "humble, helpful, lead with the problem, no marketing speak",
+    "subredditCategories": {
+      "web": ["r/webdev", "r/SideProject", "r/javascript"],
+      "devtool": ["r/programming", "r/devtools", "r/commandline"],
+      "ai": ["r/MachineLearning", "r/artificial", "r/LocalLLaMA"],
+      "python": ["r/Python", "r/learnpython"],
+      "rust": ["r/rust"],
+      "go": ["r/golang"],
+      "mobile": ["r/reactnative", "r/FlutterDev", "r/iOSProgramming"]
+    }
+  },
+  "hackernews": {
+    "titleMaxLength": 80,
+    "titleFormat": "Show HN: {name} – {description}",
+    "culture": "technical depth, no marketing, link to GitHub directly"
+  },
+  "twitter": {
+    "tweetMaxLength": 280,
+    "threadLength": "5-7 tweets",
+    "culture": "concise, line breaks for readability, 1-2 hashtags max"
+  },
+  "producthunt": {
+    "taglineMaxLength": 60,
+    "descriptionParagraphs": "3-4",
+    "topicCount": "3-5",
+    "culture": "product-focused, explain value, personal maker comment"
+  },
+  "devto": {
+    "titleFormat": "I built {tool} to solve {problem} — here's how",
+    "tagCount": 4,
+    "culture": "conversational, include code, tell a story"
+  }
+}

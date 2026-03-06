@@ -1,0 +1,18 @@
+services:
+  git-launcher:
+    build: .
+    user: "1000:1000"
+    network_mode: "none"
+    read_only: true
+    tmpfs:
+      - /tmp:size=100M
+    volumes:
+      - ../production:/project:ro
+      - ./artifacts:/artifacts:rw
+    working_dir: /workspace
+    environment:
+      - NODE_ENV=production
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
