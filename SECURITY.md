@@ -12,7 +12,7 @@ If you discover a security vulnerability in Git Launcher, please report it respo
 
 **Do not open a public issue.**
 
-Instead, email: **security@julieclarkson.com**
+Instead, email: **support@superflyweb.com**
 
 Include:
 - Description of the vulnerability
@@ -20,7 +20,6 @@ Include:
 - Impact assessment
 - Suggested fix (if any)
 
-You will receive an acknowledgment within 48 hours and a detailed response within 7 days.
 
 ## Scope
 
