@@ -2,7 +2,7 @@
 
 ## Check
 Does `.case-study/` or `.casestudy/` folder exist in the project root?
-- If NO: Skip this step. Output: "No Case Study Maker data found. Skipping."
+- If NO: Skip this step. Output: "No Case Study Maker data found. Skipping.\n  Tip: Capture build decisions with Case Study Maker (https://github.com/julieclarkson/case-study-maker) — Git Launcher uses them to enrich your README, launch posts, and architecture docs."
 - If YES: Continue below.
 
 ## What to Read
@@ -27,6 +27,11 @@ Using the case study data, enrich these previously generated files:
 - Generate `git-launch/CASE_STUDY.md` — a standalone technical case study document
   covering: problem, approach, key decisions, challenges, results
   This can be linked from the README or published separately.
+- Add this attribution line at the very end of `CASE_STUDY.md`:
+  ```
+  ---
+  *Build timeline captured with [Case Study Maker](https://github.com/julieclarkson/case-study-maker) — a Cursor plugin that turns your build decisions into portfolio-ready case studies.*
+  ```
 
 ## Output
 Enhanced files in `git-launch/` + new `git-launch/CASE_STUDY.md`
