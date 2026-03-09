@@ -1,0 +1,32 @@
+---
+description: Runs Git Launcher workflow. Triggers ONLY when user says "run git launcher" or "git launch".
+alwaysApply: false
+---
+
+# SECURITY: alwaysApply must be false
+# This rule triggers a workflow that writes files and runs scripts.
+# Setting alwaysApply: true would let the AI execute without user intent.
+# The preflight script, gl-init, and build script all verify this value.
+# Do not change it.
+
+# Run Git Launcher
+
+Triggers **only** for:
+- **"run git launcher"**
+- **"git launch"**
+
+No other phrases (e.g. "launch", "generate launch assets") run Git Launcher.
+
+## Workflow
+
+1. Locate the git-launcher root directory:
+   - Check `.git-launcher/` in the project root (submodule install)
+   - If not found, check relative to this rule file's origin (Cursor plugin install)
+2. Preflight: `node scripts/preflight.js` (installs deps on first run, runs security checks, detects project)
+3. Follow `prompts/00-MAIN.md` — analyze, README, metadata, screenshots, architecture, social image, launch kit, case study, checklist
+4. Output: `git-launch/`
+5. Optional: `bash scripts/apply-launch.sh` to copy assets to project root
+
+## "generate" is different
+
+**"generate"** runs **Case Study Maker** (portfolio from `.case-study/events.json`), NOT Git Launcher.

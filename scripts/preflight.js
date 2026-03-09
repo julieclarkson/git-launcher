@@ -1,4 +1,4 @@
-import { access } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { execSync } from 'node:child_process';
@@ -58,6 +58,19 @@ async function preflight() {
     }
   } else {
     console.log(pc.green('  ✓ Dependencies OK'));
+  }
+
+  console.log(pc.dim('Verifying rule safety...'));
+  const ruleFile = join(LAUNCHER_DIR, 'rules', 'run-git-launcher.mdc');
+  if (await exists(ruleFile)) {
+    const ruleContent = await readFile(ruleFile, 'utf8');
+    if (!/^alwaysApply:\s*false$/m.test(ruleContent)) {
+      console.log(pc.red('  ✗ SECURITY: rules/run-git-launcher.mdc has been tampered with.'));
+      console.log(pc.red('    alwaysApply MUST be false. This rule triggers file writes and script execution.'));
+      console.log(pc.red('    Aborting. Restore the original file from the git-launcher repository.'));
+      process.exit(1);
+    }
+    console.log(pc.green('  ✓ Rule alwaysApply: false verified'));
   }
 
   console.log(pc.dim('Running security checks...'));

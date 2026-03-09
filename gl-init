@@ -1,0 +1,93 @@
+#!/usr/bin/env bash
+# Git Launcher — Initialize in the current project.
+# Run from your project directory. Works with git-launcher installed as a submodule.
+#
+# Usage:
+#   cd /path/to/your-project
+#   .git-launcher/gl-init
+#
+# The script finds the plugin directory from its own location.
+
+set -e
+
+GL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+PROJECT_DIR="$(pwd)"
+
+# ── Verify plugin files exist ──────────────────────────────────
+
+if [ ! -f "$GL_DIR/prompts/00-MAIN.md" ]; then
+  echo "Error: Git Launcher files not found at $GL_DIR"
+  echo "  Make sure you're running gl-init from the git-launcher directory."
+  exit 1
+fi
+
+# ── SECURITY: Verify alwaysApply: false in rule file ───────────
+# This rule triggers a workflow that writes files and runs scripts.
+# alwaysApply must NEVER be true. This check runs at init time,
+# and again at runtime in preflight.js and build-production.sh.
+
+RULE_FILE="$GL_DIR/rules/run-git-launcher.mdc"
+if [ -f "$RULE_FILE" ]; then
+  if ! grep -q '^alwaysApply: false' "$RULE_FILE"; then
+    echo "SECURITY ERROR: rules/run-git-launcher.mdc has been tampered with."
+    echo "  alwaysApply MUST be false. This rule triggers file writes and script execution."
+    echo "  Aborting. Restore the original file from the git-launcher repository."
+    exit 1
+  fi
+fi
+
+echo "Initializing Git Launcher in: $PROJECT_DIR"
+echo ""
+
+# ── Install Node dependencies ─────────────────────────────────
+
+echo "Installing dependencies..."
+cd "$GL_DIR"
+npm install
+echo ""
+
+echo "Installing Chromium for screenshots..."
+npx playwright install chromium
+echo ""
+
+node scripts/verify-setup.js
+echo ""
+cd "$PROJECT_DIR"
+
+# ── Copy rules to .cursor/rules/ ──────────────────────────────
+
+mkdir -p .cursor/rules
+cp "$GL_DIR/rules/run-git-launcher.mdc" .cursor/rules/run-git-launcher.mdc
+echo "  Copied rule to .cursor/rules/"
+
+# ── Copy commands to .cursor/commands/ ─────────────────────────
+
+mkdir -p .cursor/commands
+for cmd in "$GL_DIR/commands/"*.md; do
+  [ -f "$cmd" ] && cp "$cmd" .cursor/commands/ 2>/dev/null || true
+done
+echo "  Copied commands to .cursor/commands/"
+
+# ── Update .gitignore ─────────────────────────────────────────
+
+touch .gitignore
+grep -q '.git-launcher/node_modules' .gitignore 2>/dev/null || echo '.git-launcher/node_modules/' >> .gitignore
+grep -q 'run-git-launcher.mdc' .gitignore 2>/dev/null || echo '.cursor/rules/run-git-launcher.mdc' >> .gitignore
+grep -q 'git-launch/' .gitignore 2>/dev/null || echo 'git-launch/' >> .gitignore
+echo "  Updated .gitignore"
+
+echo ""
+echo "Done. Git Launcher is ready."
+echo ""
+echo "  .git-launcher/       — prompts, scripts, templates"
+echo "  .cursor/rules/       — AI rule (triggers on 'run git launcher')"
+echo "  .cursor/commands/    — /git-launch and /gl slash commands"
+echo ""
+echo "Next steps:"
+echo "  1. Open this project in Cursor"
+echo "  2. Type /git-launch or say 'run git launcher' in chat"
+echo "  3. The AI will analyze your codebase and generate everything to git-launch/"
+echo ""
+echo "Or add as a submodule first:"
+echo "  git submodule add https://github.com/julieclarkson/git-launcher .git-launcher"
+echo ""

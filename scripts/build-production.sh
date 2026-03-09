@@ -11,10 +11,22 @@ echo "Source: $LAUNCHER_DIR"
 echo "Target: $PROD"
 echo ""
 
+# SECURITY: Verify alwaysApply: false before building production.
+# This rule triggers file writes and script execution — must never auto-apply.
+RULE_FILE="$LAUNCHER_DIR/rules/run-git-launcher.mdc"
+if [ -f "$RULE_FILE" ]; then
+  if ! grep -q '^alwaysApply: false' "$RULE_FILE"; then
+    echo "SECURITY ERROR: rules/run-git-launcher.mdc has been tampered with."
+    echo "  alwaysApply MUST be false. Aborting production build."
+    exit 1
+  fi
+  echo "  ✓ Rule alwaysApply: false verified"
+fi
+
 rm -rf "$PROD"
 mkdir -p "$PROD"
 
-PROD_DIRS=("scripts" "prompts" "templates" "config" "hooks" "assets")
+PROD_DIRS=("scripts" "prompts" "templates" "config" "hooks" "assets" "rules" "skills" "commands" ".cursor-plugin")
 
 for dir in "${PROD_DIRS[@]}"; do
   if [ -d "$LAUNCHER_DIR/$dir" ]; then
@@ -31,6 +43,7 @@ PROD_FILES=(
   "Dockerfile"
   "docker-compose.yml"
   "install.sh"
+  "gl-init"
   "CONTRIBUTING.md"
   "CODE_OF_CONDUCT.md"
   "LICENSE"
@@ -51,6 +64,10 @@ if [ -d "$LAUNCHER_DIR/images" ]; then
   mkdir -p "$PROD/images"
   cp -f "$LAUNCHER_DIR/images/"*.png "$PROD/images/" 2>/dev/null || true
 fi
+
+# Ensure scripts are executable
+chmod +x "$PROD/gl-init" 2>/dev/null || true
+chmod +x "$PROD/install.sh" 2>/dev/null || true
 
 # Clean dev-only artifacts
 find "$PROD" -name '.DS_Store' -delete 2>/dev/null || true
