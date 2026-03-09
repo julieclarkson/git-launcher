@@ -22,7 +22,9 @@
     "task-preview": "node scripts/pre-build-check.js && node scripts/generate-preview.js",
     "task-social": "node scripts/pre-build-check.js && node scripts/image-generator.js",
     "staleness": "node scripts/staleness-check.js",
-    "apply-launch": "bash scripts/apply-launch.sh"
+    "apply-launch": "bash scripts/apply-launch.sh",
+    "deploy-to-website": "node scripts/deploy-to-website.cjs",
+    "generate-index-card": "node scripts/generate-index-card.cjs"
   },
   "dependencies": {
     "marked": "17.0.4",
