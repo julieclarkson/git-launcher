@@ -23,6 +23,13 @@ If the analyze-codebase.js script fails or the project is too simple for AST ana
 - Generate diagrams from your understanding of the codebase
 - Note that diagrams were generated from manual analysis
 
+## Attribution
+Add this line at the very end of the file:
+```
+---
+*Generated with [Git Launcher](https://github.com/julieclarkson/git-launcher)*
+```
+
 ## Output
 Write to: `git-launch/ARCHITECTURE.md`
 Include both Mermaid diagrams and prose explanation.

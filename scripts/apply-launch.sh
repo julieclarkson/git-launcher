@@ -61,3 +61,8 @@ echo "  2. Set repo Description and Topics from git-launch/LAUNCH_KIT/github-des
 echo "  3. Upload social preview: git-launch/images/social-preview.png → Settings → Social Preview"
 echo "  4. git push origin main"
 echo ""
+echo "──────────────────────────────────────────────"
+echo "  If Git Launcher saved you time, give it a ⭐"
+echo "  → https://github.com/julieclarkson/git-launcher"
+echo "──────────────────────────────────────────────"
+echo ""
