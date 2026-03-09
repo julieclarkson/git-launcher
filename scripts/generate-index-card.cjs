@@ -34,24 +34,30 @@ function loadData() {
 function discoverAssets(projectSlug) {
   if (!existsSync(OUTPUTS)) return [];
   const files = readdirSync(OUTPUTS);
-  const out = [];
-  const seen = new Set();
+  const candidates = [];
   const uniqueIdRe = /-(\d{8}-\d{6})(?:\.|$)/;
   for (const f of files) {
-    if (!f.endsWith('.html')) continue;
+    if (!f.endsWith('.html') || f === 'index-card.html') continue;
     const base = f.replace(/\.html$/, '');
     const m = base.match(new RegExp(`^${projectSlug}-(portfolio|marketing|pitch-deck)-(\\d{8}-\\d{6})$`));
     const tid = base.match(uniqueIdRe)?.[1];
     if (m) {
-      out.push({ type: m[1], base, deployedBase: `${projectSlug}-${m[1]}-${m[2]}`, uniqueId: m[2] });
-      seen.add(f);
-    } else if (/^(portfolio|marketing|pitch-deck)[-_].*/.test(base) && tid) {
-      const type = base.includes('portfolio') && !base.includes('card') ? 'portfolio' : base.includes('marketing') ? 'marketing' : 'pitch-deck';
-      out.push({ type, base, deployedBase: `${projectSlug}-${type}-${tid}`, uniqueId: tid });
-      seen.add(f);
+      candidates.push({ type: m[1], base, deployedBase: `${projectSlug}-${m[1]}-${m[2]}`, uniqueId: m[2] });
+    } else if (/^(portfolio|marketing|pitch-deck)[-_].*/.test(base) && tid && !base.includes('card')) {
+      const type = base.includes('portfolio') ? 'portfolio' : base.includes('marketing') ? 'marketing' : 'pitch-deck';
+      candidates.push({ type, base, deployedBase: `${projectSlug}-${type}-${tid}`, uniqueId: tid });
     }
   }
-  return out;
+  // Keep only the latest per type (deduplicate by type)
+  const byType = {};
+  for (const a of candidates) {
+    const prev = byType[a.type];
+    if (!prev || (a.uniqueId > prev.uniqueId)) byType[a.type] = a;
+  }
+  return Object.values(byType).sort((a, b) => {
+    const order = { portfolio: 0, marketing: 1, 'pitch-deck': 2 };
+    return (order[a.type] ?? 3) - (order[b.type] ?? 3);
+  });
 }
 
 function escapeHtml(s) {
@@ -132,16 +138,19 @@ function main() {
   const assets = discoverAssets(projectSlug);
 
   if (assets.length === 0) {
-    const files = existsSync(OUTPUTS) ? readdirSync(OUTPUTS).filter(f => f.endsWith('.html')) : [];
+    const files = existsSync(OUTPUTS) ? readdirSync(OUTPUTS).filter(f => f.endsWith('.html') && f !== 'index-card.html') : [];
     const uniqueIdRe = /-(\d{8}-\d{6})(?:\.|$)/;
+    const byType = {};
     for (const f of files) {
       const base = f.replace(/\.html$/, '');
       const tid = base.match(uniqueIdRe)?.[1];
-      if (tid) {
-        const type = base.includes('portfolio') && !base.includes('card') ? 'portfolio' : base.includes('marketing') ? 'marketing' : 'pitch-deck';
-        assets.push({ type, base, deployedBase: `${projectSlug}-${type}-${tid}`, uniqueId: tid });
+      if (tid && !base.includes('card')) {
+        const type = base.includes('portfolio') ? 'portfolio' : base.includes('marketing') ? 'marketing' : 'pitch-deck';
+        const a = { type, base, deployedBase: `${projectSlug}-${type}-${tid}`, uniqueId: tid };
+        if (!byType[type] || tid > byType[type].uniqueId) byType[type] = a;
       }
     }
+    assets.push(...Object.values(byType));
   }
 
   const html = renderCard(data, assets, basePath);
